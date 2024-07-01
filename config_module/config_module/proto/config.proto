@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package config;
+
+service ConfigServer {
+  rpc GetConfig (ConfigRequest) returns (ConfigReply) {}
+}
+
+message ConfigRequest {
+  string app_id = 1;
+}
+
+message KeyValue {
+    string key = 1;
+    string value = 2;
+    string type = 3;
+}
+
+message ConfigReply {
+  repeated KeyValue config_data = 1;
+}
