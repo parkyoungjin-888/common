@@ -1,13 +1,12 @@
 [tool.poetry]
 name = "influxdb-module"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["parkyoungjin-888 <pyj8813@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-config = {path = "../../config/dist/config-0.1.0-py3-none-any.whl"}
 influxdb-client = "^1.42.0"
 pandas = "^2.2.2"
 
