@@ -12,6 +12,7 @@ class KafkaConsumerControl:
             auto_offset_reset=auto_offset_reset,
             enable_auto_commit=enable_auto_commit,
             group_id=group_id,
+            key_deserializer=lambda k: k.decode('utf-8'),
             value_deserializer=lambda x: json.loads(x.decode('utf-8'))
         )
 
@@ -21,3 +22,6 @@ class KafkaConsumerControl:
 
     def close(self):
         self.consumer.close()
+
+    def __del__(self):
+        self.close()
