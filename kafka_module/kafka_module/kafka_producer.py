@@ -1,11 +1,13 @@
 from kafka import KafkaProducer
 from json import dumps
-from kafka_module.model.data_model import Rawdata, Imgdata
+from data_model_module.raw_data_model import Rawdata, Imgdata
+from data_model_module.validate_decorator import validate_input
 
 
 class KafkaProducerControl:
-    def __init__(self, server_urls: list[str], topic: str):
+    def __init__(self, server_urls: list[str], topic: str, key: str):
         self.topic = topic
+        self.key = key
         self.producer = KafkaProducer(
             acks=0,
             compression_type='gzip',
@@ -14,23 +16,19 @@ class KafkaProducerControl:
             value_serializer=lambda x: dumps(x).encode('utf-8')
         )
 
-    def send_data(self, data: Rawdata, key: str = None):
+    @validate_input(Rawdata)
+    def send_data(self, data_model: Rawdata):
         try:
-            if key is None:
-                future = self.producer.send(self.topic, value=data.model_dump())
-            else:
-                future = self.producer.send(self.topic, value=data.model_dump(), key=key)
+            future = self.producer.send(self.topic, value=data_model.model_dump(), key=self.key)
             result = future.get(timeout=10)  # 메시지 전송 결과를 기다림 (동기식)
             print(f"Message sent successfully: {result}")
         except Exception as e:
             print(f"Failed to send message: {e}")
 
-    def send_img(self, img_data: Imgdata, key: str = None):
+    @validate_input(Imgdata)
+    def send_img(self, data_model: Imgdata):
         try:
-            if key is None:
-                future = self.producer.send(self.topic, value=img_data.model_dump())
-            else:
-                future = self.producer.send(self.topic, value=img_data.model_dump(), key=key)
+            future = self.producer.send(self.topic, value=data_model.model_dump(), key=self.key)
             result = future.get(timeout=10)
             print(f"Message sent successfully: {result}")
         except Exception as e:
@@ -50,7 +48,7 @@ if __name__ == '__main__':
 
     _server_urls = ['192.168.0.104:9091', '192.168.0.104:9092', '192.168.0.104:9093']
 
-    kafka_producer = KafkaProducerControl(_server_urls, 'test_topic')
+    kafka_producer = KafkaProducerControl(_server_urls, 'test_topic', 'test_img')
 
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
@@ -59,16 +57,21 @@ if __name__ == '__main__':
 
     _key = 'test'
 
-    while True:
+    for i in range(100):
         ret, img = cap.read()
         _timestamp = datetime.now().timestamp()
 
         # cv2.imshow('img', img)
         # cv2.waitKey(0)
 
-        _img_data = Imgdata(name='test_img.jpg', timestamp=_timestamp,
-                            width=img.shape[1], height=img.shape[0], img=img)
-        kafka_producer.send_img(_img_data, key=_key)
+        _img_data = {
+            'name': 'test_img.jpg',
+            'timestamp': _timestamp,
+            'width': img.shape[1],
+            'height': img.shape[0],
+            'img': img
+        }
+        kafka_producer.send_img(**_img_data)
 
         # _data = Rawdata(timestamp=1725188400, io_id='aaa', value=1.1)
         # kafka_producer.send_data(_data)

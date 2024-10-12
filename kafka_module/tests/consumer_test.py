@@ -2,7 +2,7 @@ import cv2
 from datetime import datetime
 
 from kafka_module.kafka_consumer import KafkaConsumerControl
-from kafka_module.model.data_model import Imgdata
+from data_model_module.raw_data_model import Imgdata
 
 
 class TestControl:
