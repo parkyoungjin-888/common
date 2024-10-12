@@ -38,8 +38,8 @@ class Imgdata(BaseModel):
 
 
 class RawdataBatch(BaseModel):
-    data: list[Rawdata]
+    batch: list[Rawdata]
 
 
 class ImgdataBatch(BaseModel):
-    data: list[Imgdata]
+    batch: list[Imgdata]

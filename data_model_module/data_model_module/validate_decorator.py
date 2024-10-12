@@ -7,10 +7,11 @@ def validate_input(model):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
-                validated_data = model(**kwargs).model_dump()
+                validated_data = model(**kwargs)
             except ValidationError as e:
+                print(e)
                 return {'validation error': e.errors()}
-            return func(data=validated_data, *args)
+            return func(*args, **{'data_model': validated_data})
         return wrapper
     return decorator
 
@@ -25,6 +26,7 @@ def validate_output(model):
             try:
                 validated_data = model(**result)
             except ValidationError as e:
+                print(e)
                 return {'validation error': e.errors()}
             return validated_data.model_dump()
         return wrapper

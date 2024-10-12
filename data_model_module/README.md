@@ -23,3 +23,4 @@ poetry install
 ## History
 + v0.1.0: init, raw_data_model 추가
 + v0.1.1: validate_decorator 추가
++ v0.1.2: batch 모델 수정, 빌드 파일 제거
