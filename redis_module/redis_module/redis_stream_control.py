@@ -40,32 +40,22 @@ class RedisStreamControl:
                 raise e
 
     @validate_input(RawdataBatch)
-    # def put_raw_data(self, data_list: list):
-    #     if self._stream is None:
-    #         print('stream is None, add is not work')
-    #         return None
-    #
-    #     pipe = self._redis.pipeline()
-    #     for data in data_list:
-    #         pipe.xadd(self._stream, data)
-    #     data_ids = pipe.execute()
-    #     if self._ttl:
-    #         for data_id in data_ids:
-    #             pipe.zadd(f'{self._stream}_ttl', {data_id: time.time() + self._ttl})
-    #         pipe.execute()
-    #     return data_ids
-    def put_raw_data(self, data_list: list):
+    def put_raw_data(self, data_model):
         if self._stream is None:
             print('stream is None, add is not work')
             return None
 
+        batch = data_model.model_dump()['batch']
+
         pipe = self._redis.pipeline()
-        data_ids = [pipe.xadd(self._stream, data) for data in data_list]
+        for data in batch:
+            pipe.xadd(self._stream, data)
+        data_ids = pipe.execute()
         if self._ttl:
             current_time = time.time()
             ttl_data = {data_id: current_time + self._ttl for data_id in data_ids}
             pipe.zadd(f'{self._stream}_ttl', ttl_data)
-        data_ids = pipe.execute()
+        pipe.execute()
         return data_ids
 
     @validate_output(RawdataBatch)
@@ -82,32 +72,27 @@ class RedisStreamControl:
         messages = self._redis.xreadgroup(self.consumer_group, self.consumer_name, {self._stream: '>'}, count)
         if messages:
             _, data_list = messages[0]
-            data = [decode_dict(data) for data_id, data in data_list]
-            return {'data': data}
+            batch = [decode_dict(data) for data_id, data in data_list]
+            return {'batch': batch}
         return None
 
     @validate_input(ImgdataBatch)
-    # def put_img_data(self, data: dict):
-    #     data_id = None
-    #     if self._stream is None:
-    #         print('stream is None, add is not work')
-    #     else:
-    #         data_id = self._redis.xadd(self._stream, data)
-    #         if self._ttl:
-    #             self._redis.zadd(f'{self._stream}_ttl', {data_id: time.time() + self._ttl})
-    #     return data_id
-    def put_img_data(self, data_list: list):
+    def put_img_data(self, data_model):
         if self._stream is None:
             print('stream is None, add is not work')
             return None
 
+        batch = data_model.model_dump()['batch']
+
         pipe = self._redis.pipeline()
-        data_ids = [pipe.xadd(self._stream, data) for data in data_list]
+        for data in batch:
+            pipe.xadd(self._stream, data)
+        data_ids = pipe.execute()
         if self._ttl:
             current_time = time.time()
             ttl_data = {data_id: current_time + self._ttl for data_id in data_ids}
             pipe.zadd(f'{self._stream}_ttl', ttl_data)
-        data_ids = pipe.execute()
+        pipe.execute()
         return data_ids
 
     @validate_output(ImgdataBatch)
@@ -124,8 +109,8 @@ class RedisStreamControl:
         messages = self._redis.xreadgroup(self.consumer_group, self.consumer_name, {self._stream: '>'}, count)
         if messages:
             _, data_list = messages[0]
-            data = [decode_dict(data) for data_id, data in data_list]
-            return {'data': data}
+            batch = [decode_dict(data) for data_id, data in data_list]
+            return {'batch': batch}
         return None
 
     def remove_expired_data(self):
@@ -145,20 +130,22 @@ if __name__ == '__main__':
     redis_stream_control = RedisStreamControl('127.0.0.1', 6379, 0, 'test_stream', 15,
                                               'group_1', 'consumer_1')
 
-    # for i in range(10):
-    #     value = i * 100.0
-    #     test_data = {'io_id': 'io_1', 'timestamp': datetime.now().timestamp(), 'value': value}
-    #     redis_stream_control.put_raw_data(**test_data)
-    #     print(i)
-    #     time.sleep(1)
+    test_raw_data_list = []
+    for i in range(5):
+        value = i * 100.0
+        test_data = {'io_id': 'io_1', 'timestamp': datetime.now().timestamp(), 'value': value}
+        test_raw_data_list.append(test_data)
+        print(i)
+        time.sleep(1)
+    redis_stream_control.put_raw_data(batch=test_raw_data_list)
 
-    # raw_data_1 = redis_stream_control.get_raw_data(count=2)
-    # raw_data_2 = redis_stream_control.get_raw_data(count=2)
+    raw_data_1 = redis_stream_control.get_raw_data(count=2)
+    raw_data_2 = redis_stream_control.get_raw_data(count=2)
 
     # while True:
     #     redis_stream_control.remove_expired_data()
     #     time.sleep(0.1)
 
-    img_data = redis_stream_control.get_img_data(count=2)
+    # img_data = redis_stream_control.get_img_data(count=2)
 
     print('end')
