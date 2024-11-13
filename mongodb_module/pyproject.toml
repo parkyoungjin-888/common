@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "mongodb-module"
+version = "0.1.0"
+description = ""
+authors = ["parkyoungjin-888 <pyj8813@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+beanie = "^1.27.0"
+data-model-module = { git = "https://github.com/parkyoungjin-888/common.git", subdirectory = "data_model_module" }
+grpcio = "^1.64.1"
+grpcio-tools = "^1.64.1"
+protobuf = "^5.27.1"
+google = "^3.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
