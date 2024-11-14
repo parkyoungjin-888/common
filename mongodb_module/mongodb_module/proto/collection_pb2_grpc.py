@@ -44,23 +44,18 @@ class CollectionServerStub(object):
                 request_serializer=mongodb__module_dot_proto_dot_collection__pb2.DocListRequest.SerializeToString,
                 response_deserializer=mongodb__module_dot_proto_dot_collection__pb2.IdListResponse.FromString,
                 _registered_method=True)
-        self.GetCount = channel.unary_unary(
-                '/collection.CollectionServer/GetCount',
-                request_serializer=mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.SerializeToString,
-                response_deserializer=mongodb__module_dot_proto_dot_collection__pb2.CountResponse.FromString,
-                _registered_method=True)
         self.GetTag = channel.unary_unary(
                 '/collection.CollectionServer/GetTag',
                 request_serializer=mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.SerializeToString,
                 response_deserializer=mongodb__module_dot_proto_dot_collection__pb2.DocResponse.FromString,
                 _registered_method=True)
-        self.GetDetail = channel.unary_unary(
-                '/collection.CollectionServer/GetDetail',
+        self.GetOne = channel.unary_unary(
+                '/collection.CollectionServer/GetOne',
                 request_serializer=mongodb__module_dot_proto_dot_collection__pb2.IdRequest.SerializeToString,
                 response_deserializer=mongodb__module_dot_proto_dot_collection__pb2.DocResponse.FromString,
                 _registered_method=True)
-        self.GetList = channel.unary_unary(
-                '/collection.CollectionServer/GetList',
+        self.GetMany = channel.unary_unary(
+                '/collection.CollectionServer/GetMany',
                 request_serializer=mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.SerializeToString,
                 response_deserializer=mongodb__module_dot_proto_dot_collection__pb2.DocListResponse.FromString,
                 _registered_method=True)
@@ -106,25 +101,19 @@ class CollectionServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetCount(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def GetTag(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetDetail(self, request, context):
+    def GetOne(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetList(self, request, context):
+    def GetMany(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -173,23 +162,18 @@ def add_CollectionServerServicer_to_server(servicer, server):
                     request_deserializer=mongodb__module_dot_proto_dot_collection__pb2.DocListRequest.FromString,
                     response_serializer=mongodb__module_dot_proto_dot_collection__pb2.IdListResponse.SerializeToString,
             ),
-            'GetCount': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetCount,
-                    request_deserializer=mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.FromString,
-                    response_serializer=mongodb__module_dot_proto_dot_collection__pb2.CountResponse.SerializeToString,
-            ),
             'GetTag': grpc.unary_unary_rpc_method_handler(
                     servicer.GetTag,
                     request_deserializer=mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.FromString,
                     response_serializer=mongodb__module_dot_proto_dot_collection__pb2.DocResponse.SerializeToString,
             ),
-            'GetDetail': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetDetail,
+            'GetOne': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetOne,
                     request_deserializer=mongodb__module_dot_proto_dot_collection__pb2.IdRequest.FromString,
                     response_serializer=mongodb__module_dot_proto_dot_collection__pb2.DocResponse.SerializeToString,
             ),
-            'GetList': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetList,
+            'GetMany': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMany,
                     request_deserializer=mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.FromString,
                     response_serializer=mongodb__module_dot_proto_dot_collection__pb2.DocListResponse.SerializeToString,
             ),
@@ -284,33 +268,6 @@ class CollectionServer(object):
             _registered_method=True)
 
     @staticmethod
-    def GetCount(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/collection.CollectionServer/GetCount',
-            mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.SerializeToString,
-            mongodb__module_dot_proto_dot_collection__pb2.CountResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
     def GetTag(request,
             target,
             options=(),
@@ -338,7 +295,7 @@ class CollectionServer(object):
             _registered_method=True)
 
     @staticmethod
-    def GetDetail(request,
+    def GetOne(request,
             target,
             options=(),
             channel_credentials=None,
@@ -351,7 +308,7 @@ class CollectionServer(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/collection.CollectionServer/GetDetail',
+            '/collection.CollectionServer/GetOne',
             mongodb__module_dot_proto_dot_collection__pb2.IdRequest.SerializeToString,
             mongodb__module_dot_proto_dot_collection__pb2.DocResponse.FromString,
             options,
@@ -365,7 +322,7 @@ class CollectionServer(object):
             _registered_method=True)
 
     @staticmethod
-    def GetList(request,
+    def GetMany(request,
             target,
             options=(),
             channel_credentials=None,
@@ -378,7 +335,7 @@ class CollectionServer(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/collection.CollectionServer/GetList',
+            '/collection.CollectionServer/GetMany',
             mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.SerializeToString,
             mongodb__module_dot_proto_dot_collection__pb2.DocListResponse.FromString,
             options,

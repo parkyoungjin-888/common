@@ -7,10 +7,9 @@ package collection;
 service CollectionServer {
   rpc InsertOne (DocRequest) returns (IdResponse);
   rpc InsertMany (DocListRequest) returns (IdListResponse);
-  rpc GetCount (QueryRequest) returns (CountResponse);
   rpc GetTag (QueryRequest) returns (DocResponse);
-  rpc GetDetail (IdRequest) returns (DocResponse);
-  rpc GetList (QueryRequest) returns (DocListResponse);
+  rpc GetOne (IdRequest) returns (DocResponse);
+  rpc GetMany (QueryRequest) returns (DocListResponse);
   rpc UpdateOne (UpdateRequest) returns (CountResponse);
   rpc UpdateMany (UpdateManyRequest) returns (CountResponse);
   rpc DeleteOne (IdRequest) returns (CountResponse);
@@ -32,7 +31,7 @@ message DocListRequest {
 
 message QueryRequest {
   google.protobuf.Struct filter = 1;
-  google.protobuf.Struct project = 2;
+  string project_model = 2;
   repeated string sort = 3;
   int32 page_size = 4;
   int32 page_num = 5;

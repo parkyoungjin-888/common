@@ -17,7 +17,7 @@ class BaseDocument(Document):
             cursor = cursor.skip(skip).limit(page_size)
 
         doc_list = await cursor.to_list()
-        doc_list = [doc.model_dump() for doc in doc_list]
+        doc_list = [doc.model_dump(by_alias=True) for doc in doc_list]
         return doc_list
 
     @classmethod

@@ -49,9 +49,9 @@ class CollectionClient:
         res = await self.stub.InsertMany(doc_list_req)
         return res
 
-    @grpc_client_error_handler(pb2.CountResponse())
-    async def get_count(self, query_req: pb2.QueryRequest) -> dict:
-        res = await self.stub.GetCount(query_req)
+    @grpc_client_error_handler(pb2.DocListResponse())
+    async def get_many(self, query_req: pb2.QueryRequest) -> dict:
+        res = await self.stub.GetMany(query_req)
         return res
 
 
@@ -70,7 +70,8 @@ async def main():
 
         query_req = pb2.QueryRequest()
         query_req.filter = {'name': {'$gte': '1'}}
-        res = await client.get_count(query_req)
+        query_req.project_model = 'ProjectUser'
+        res = await client.get_many(query_req)
 
         print(res)
 
