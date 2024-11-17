@@ -46,7 +46,7 @@ class CollectionServerStub(object):
                 _registered_method=True)
         self.GetTag = channel.unary_unary(
                 '/collection.CollectionServer/GetTag',
-                request_serializer=mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.SerializeToString,
+                request_serializer=mongodb__module_dot_proto_dot_collection__pb2.TagRequest.SerializeToString,
                 response_deserializer=mongodb__module_dot_proto_dot_collection__pb2.DocResponse.FromString,
                 _registered_method=True)
         self.GetOne = channel.unary_unary(
@@ -164,7 +164,7 @@ def add_CollectionServerServicer_to_server(servicer, server):
             ),
             'GetTag': grpc.unary_unary_rpc_method_handler(
                     servicer.GetTag,
-                    request_deserializer=mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.FromString,
+                    request_deserializer=mongodb__module_dot_proto_dot_collection__pb2.TagRequest.FromString,
                     response_serializer=mongodb__module_dot_proto_dot_collection__pb2.DocResponse.SerializeToString,
             ),
             'GetOne': grpc.unary_unary_rpc_method_handler(
@@ -282,7 +282,7 @@ class CollectionServer(object):
             request,
             target,
             '/collection.CollectionServer/GetTag',
-            mongodb__module_dot_proto_dot_collection__pb2.QueryRequest.SerializeToString,
+            mongodb__module_dot_proto_dot_collection__pb2.TagRequest.SerializeToString,
             mongodb__module_dot_proto_dot_collection__pb2.DocResponse.FromString,
             options,
             channel_credentials,

@@ -6,11 +6,15 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 class BaseDocument(Document):
     @classmethod
-    async def find_with_paginate(cls, find_key: dict, sort: list[str] = None, project_model: Type[BaseModel] = None,
-                                 page_size: int = None, page_num: int = None) -> List[dict]:
-        default_sort = ['-_id'] if sort is None or ('+_id' not in sort and '-_id' not in sort) else []
-        sort = sort + default_sort if sort is not None else default_sort
-        cursor = cls.find(find_key, projection_model=project_model).sort(*sort)
+    async def find_with_paginate(cls, query: dict, sort: list[str] = None, project_model: Type[BaseModel] = None,
+                                 page_size: int = None, page_num: int = None) -> dict:
+        default_sort = ['-_id']
+        if sort is None or ('+_id' not in sort and '-_id' not in sort):
+            sort = (sort or []) + default_sort
+
+        cursor = cls.find(query, projection_model=project_model).sort(*sort)
+
+        total_count = await cursor.count()
 
         if page_size is not None:
             skip = page_size * (page_num - 1)
@@ -18,7 +22,7 @@ class BaseDocument(Document):
 
         doc_list = await cursor.to_list()
         doc_list = [doc.model_dump(by_alias=True) for doc in doc_list]
-        return doc_list
+        return {'doc_list': doc_list, 'total_count': total_count}
 
     @classmethod
     async def delete_many(cls, find_key: dict) -> int:

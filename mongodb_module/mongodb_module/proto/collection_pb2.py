@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n%mongodb_module/proto/collection.proto\x12\ncollection\x1a\x1cgoogle/protobuf/struct.proto\"\x1b\n\tIdRequest\x12\x0e\n\x06\x64oc_id\x18\x01 \x01(\t\"2\n\nDocRequest\x12$\n\x03\x64oc\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct\";\n\x0e\x44ocListRequest\x12)\n\x08\x64oc_list\x18\x01 \x03(\x0b\x32\x17.google.protobuf.Struct\"\x81\x01\n\x0cQueryRequest\x12\'\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct\x12\x15\n\rproject_model\x18\x02 \x01(\t\x12\x0c\n\x04sort\x18\x03 \x03(\t\x12\x11\n\tpage_size\x18\x04 \x01(\x05\x12\x10\n\x08page_num\x18\x05 \x01(\x05\"\xad\x01\n\rUpdateRequest\x12\'\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct\x12$\n\x03set\x18\x02 \x01(\x0b\x32\x17.google.protobuf.Struct\x12&\n\x05unset\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct\x12%\n\x04push\x18\x04 \x01(\x0b\x32\x17.google.protobuf.Struct\"F\n\x11UpdateManyRequest\x12\x31\n\x0eupdate_request\x18\x01 \x03(\x0b\x32\x19.collection.UpdateRequest\"=\n\x10\x41ggregateRequest\x12)\n\x08pipeline\x18\x01 \x03(\x0b\x32\x17.google.protobuf.Struct\";\n\nIdResponse\x12\x0e\n\x06\x64oc_id\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"D\n\x0eIdListResponse\x12\x13\n\x0b\x64oc_id_list\x18\x01 \x03(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"R\n\x0b\x44ocResponse\x12$\n\x03\x64oc\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"p\n\x0f\x44ocListResponse\x12)\n\x08\x64oc_list\x18\x01 \x03(\x0b\x32\x17.google.protobuf.Struct\x12\x13\n\x0btotal_count\x18\x02 \x01(\x05\x12\x0c\n\x04\x63ode\x18\x03 \x01(\x05\x12\x0f\n\x07message\x18\x04 \x01(\t\"=\n\rCountResponse\x12\r\n\x05\x63ount\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t2\xa3\x05\n\x10\x43ollectionServer\x12;\n\tInsertOne\x12\x16.collection.DocRequest\x1a\x16.collection.IdResponse\x12\x44\n\nInsertMany\x12\x1a.collection.DocListRequest\x1a\x1a.collection.IdListResponse\x12;\n\x06GetTag\x12\x18.collection.QueryRequest\x1a\x17.collection.DocResponse\x12\x38\n\x06GetOne\x12\x15.collection.IdRequest\x1a\x17.collection.DocResponse\x12@\n\x07GetMany\x12\x18.collection.QueryRequest\x1a\x1b.collection.DocListResponse\x12\x41\n\tUpdateOne\x12\x19.collection.UpdateRequest\x1a\x19.collection.CountResponse\x12\x46\n\nUpdateMany\x12\x1d.collection.UpdateManyRequest\x1a\x19.collection.CountResponse\x12=\n\tDeleteOne\x12\x15.collection.IdRequest\x1a\x19.collection.CountResponse\x12\x41\n\nDeleteMany\x12\x18.collection.QueryRequest\x1a\x19.collection.CountResponse\x12\x46\n\tAggregate\x12\x1c.collection.AggregateRequest\x1a\x1b.collection.DocListResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n%mongodb_module/proto/collection.proto\x12\ncollection\x1a\x1cgoogle/protobuf/struct.proto\"\x1b\n\tIdRequest\x12\x0e\n\x06\x64oc_id\x18\x01 \x01(\t\"2\n\nDocRequest\x12$\n\x03\x64oc\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct\";\n\x0e\x44ocListRequest\x12)\n\x08\x64oc_list\x18\x01 \x03(\x0b\x32\x17.google.protobuf.Struct\"W\n\nTagRequest\x12\x12\n\nfield_list\x18\x01 \x03(\t\x12+\n\x05query\x18\x02 \x01(\x0b\x32\x17.google.protobuf.StructH\x00\x88\x01\x01\x42\x08\n\x06_query\"\xbc\x01\n\x0cQueryRequest\x12&\n\x05query\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct\x12\x1a\n\rproject_model\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x0c\n\x04sort\x18\x03 \x03(\t\x12\x16\n\tpage_size\x18\x04 \x01(\x05H\x01\x88\x01\x01\x12\x15\n\x08page_num\x18\x05 \x01(\x05H\x02\x88\x01\x01\x42\x10\n\x0e_project_modelB\x0c\n\n_page_sizeB\x0b\n\t_page_num\"\xe2\x02\n\rUpdateRequest\x12&\n\x05query\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct\x12)\n\x03set\x18\x02 \x01(\x0b\x32\x17.google.protobuf.StructH\x00\x88\x01\x01\x12+\n\x05unset\x18\x03 \x01(\x0b\x32\x17.google.protobuf.StructH\x01\x88\x01\x01\x12*\n\x04push\x18\x04 \x01(\x0b\x32\x17.google.protobuf.StructH\x02\x88\x01\x01\x12\x32\n\x0c\x61rray_filter\x18\x05 \x01(\x0b\x32\x17.google.protobuf.StructH\x03\x88\x01\x01\x12\x33\n\rupdate_option\x18\x06 \x01(\x0b\x32\x17.google.protobuf.StructH\x04\x88\x01\x01\x42\x06\n\x04_setB\x08\n\x06_unsetB\x07\n\x05_pushB\x0f\n\r_array_filterB\x10\n\x0e_update_option\"F\n\x11UpdateManyRequest\x12\x31\n\x0eupdate_request\x18\x01 \x03(\x0b\x32\x19.collection.UpdateRequest\"=\n\x10\x41ggregateRequest\x12)\n\x08pipeline\x18\x01 \x03(\x0b\x32\x17.google.protobuf.Struct\";\n\nIdResponse\x12\x0e\n\x06\x64oc_id\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"D\n\x0eIdListResponse\x12\x13\n\x0b\x64oc_id_list\x18\x01 \x03(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"R\n\x0b\x44ocResponse\x12$\n\x03\x64oc\x18\x01 \x01(\x0b\x32\x17.google.protobuf.Struct\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t\"p\n\x0f\x44ocListResponse\x12)\n\x08\x64oc_list\x18\x01 \x03(\x0b\x32\x17.google.protobuf.Struct\x12\x13\n\x0btotal_count\x18\x02 \x01(\x05\x12\x0c\n\x04\x63ode\x18\x03 \x01(\x05\x12\x0f\n\x07message\x18\x04 \x01(\t\"=\n\rCountResponse\x12\r\n\x05\x63ount\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t2\xa1\x05\n\x10\x43ollectionServer\x12;\n\tInsertOne\x12\x16.collection.DocRequest\x1a\x16.collection.IdResponse\x12\x44\n\nInsertMany\x12\x1a.collection.DocListRequest\x1a\x1a.collection.IdListResponse\x12\x39\n\x06GetTag\x12\x16.collection.TagRequest\x1a\x17.collection.DocResponse\x12\x38\n\x06GetOne\x12\x15.collection.IdRequest\x1a\x17.collection.DocResponse\x12@\n\x07GetMany\x12\x18.collection.QueryRequest\x1a\x1b.collection.DocListResponse\x12\x41\n\tUpdateOne\x12\x19.collection.UpdateRequest\x1a\x19.collection.CountResponse\x12\x46\n\nUpdateMany\x12\x1d.collection.UpdateManyRequest\x1a\x19.collection.CountResponse\x12=\n\tDeleteOne\x12\x15.collection.IdRequest\x1a\x19.collection.CountResponse\x12\x41\n\nDeleteMany\x12\x18.collection.QueryRequest\x1a\x19.collection.CountResponse\x12\x46\n\tAggregate\x12\x1c.collection.AggregateRequest\x1a\x1b.collection.DocListResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -38,24 +38,26 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_DOCREQUEST']._serialized_end=162
   _globals['_DOCLISTREQUEST']._serialized_start=164
   _globals['_DOCLISTREQUEST']._serialized_end=223
-  _globals['_QUERYREQUEST']._serialized_start=226
-  _globals['_QUERYREQUEST']._serialized_end=355
-  _globals['_UPDATEREQUEST']._serialized_start=358
-  _globals['_UPDATEREQUEST']._serialized_end=531
-  _globals['_UPDATEMANYREQUEST']._serialized_start=533
-  _globals['_UPDATEMANYREQUEST']._serialized_end=603
-  _globals['_AGGREGATEREQUEST']._serialized_start=605
-  _globals['_AGGREGATEREQUEST']._serialized_end=666
-  _globals['_IDRESPONSE']._serialized_start=668
-  _globals['_IDRESPONSE']._serialized_end=727
-  _globals['_IDLISTRESPONSE']._serialized_start=729
-  _globals['_IDLISTRESPONSE']._serialized_end=797
-  _globals['_DOCRESPONSE']._serialized_start=799
-  _globals['_DOCRESPONSE']._serialized_end=881
-  _globals['_DOCLISTRESPONSE']._serialized_start=883
-  _globals['_DOCLISTRESPONSE']._serialized_end=995
-  _globals['_COUNTRESPONSE']._serialized_start=997
-  _globals['_COUNTRESPONSE']._serialized_end=1058
-  _globals['_COLLECTIONSERVER']._serialized_start=1061
-  _globals['_COLLECTIONSERVER']._serialized_end=1736
+  _globals['_TAGREQUEST']._serialized_start=225
+  _globals['_TAGREQUEST']._serialized_end=312
+  _globals['_QUERYREQUEST']._serialized_start=315
+  _globals['_QUERYREQUEST']._serialized_end=503
+  _globals['_UPDATEREQUEST']._serialized_start=506
+  _globals['_UPDATEREQUEST']._serialized_end=860
+  _globals['_UPDATEMANYREQUEST']._serialized_start=862
+  _globals['_UPDATEMANYREQUEST']._serialized_end=932
+  _globals['_AGGREGATEREQUEST']._serialized_start=934
+  _globals['_AGGREGATEREQUEST']._serialized_end=995
+  _globals['_IDRESPONSE']._serialized_start=997
+  _globals['_IDRESPONSE']._serialized_end=1056
+  _globals['_IDLISTRESPONSE']._serialized_start=1058
+  _globals['_IDLISTRESPONSE']._serialized_end=1126
+  _globals['_DOCRESPONSE']._serialized_start=1128
+  _globals['_DOCRESPONSE']._serialized_end=1210
+  _globals['_DOCLISTRESPONSE']._serialized_start=1212
+  _globals['_DOCLISTRESPONSE']._serialized_end=1324
+  _globals['_COUNTRESPONSE']._serialized_start=1326
+  _globals['_COUNTRESPONSE']._serialized_end=1387
+  _globals['_COLLECTIONSERVER']._serialized_start=1390
+  _globals['_COLLECTIONSERVER']._serialized_end=2063
 # @@protoc_insertion_point(module_scope)
