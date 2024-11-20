@@ -1,11 +1,24 @@
 import asyncio
 import grpc
+import json
+from datetime import datetime
 from functools import wraps
 from google.protobuf.json_format import MessageToDict
 from google.protobuf import struct_pb2
 from mongodb_module.proto import collection_pb2 as pb2
 from mongodb_module.proto import collection_pb2_grpc
-from mongodb_module.beanie_control import BaseDocument
+from pydantic import BaseModel
+
+
+convert_map = {
+    'str': str,
+    'int': int,
+    'float': float,
+    'bool': bool,
+    'list': lambda x: json.loads(x.replace("'", '"')),
+    'datetime': (lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f')),
+    'ObjectId': str
+}
 
 
 def grpc_client_error_handler(response):
@@ -30,7 +43,7 @@ def grpc_client_error_handler(response):
 
 
 class CollectionClient:
-    def __init__(self, host: str, port: int, collection_model: type[BaseDocument]):
+    def __init__(self, host: str, port: int, collection_model: type[BaseModel]):
         self.channel = grpc.aio.insecure_channel(f'{host}:{port}')
         self.stub = collection_pb2_grpc.CollectionServerStub(self.channel)
         self.collection_model = collection_model
@@ -57,6 +70,12 @@ class CollectionClient:
     async def get_tag(self, query_req: pb2.DocResponse) -> dict:
         res = await self.stub.GetTag(query_req)
         res = MessageToDict(res, preserving_proto_field_name=True)
+        if res['code'] // 100 != 2:
+            return res
+        doc = {}
+        for key, value in res['doc'].items():
+            doc[key] = list(map(lambda x: convert_map[x['type']](x['value']), value))
+        res['doc'] = doc
         return res
 
     @grpc_client_error_handler(pb2.DocResponse())
@@ -77,6 +96,12 @@ class CollectionClient:
         res['doc_list'] = [self.collection_model(**doc).model_dump(by_alias=True) for doc in res['doc_list']]
         return res
 
+    @grpc_client_error_handler(pb2.CountResponse())
+    async def update_many(self, update_many_req: pb2.UpdateManyRequest) -> dict:
+        res = await self.stub.UpdateMany(update_many_req)
+        res = MessageToDict(res, preserving_proto_field_name=True)
+        return res
+
 
 async def main():
     from mongodb_module.beanie_data_model.user_model import UserBase
@@ -93,7 +118,7 @@ async def main():
         # res = await client.insert_many(doc_list_req)
 
         # tag_req = pb2.TagRequest()
-        # tag_req.field_list.extend(['age'])
+        # tag_req.field_list.extend(['_id', 'age', 'name'])
         # tag_req.query = {'name': {'$gte': '1'}}
         # res = await client.get_tag(tag_req)
 
@@ -101,13 +126,26 @@ async def main():
         # id_req.doc_id = '6734aa6c310830ac00960585'
         # res = await client.get_one(id_req)
 
-        query_req = pb2.QueryRequest()
-        query_req.query = {'name': {'$gte': '1'}}
-        query_req.project_model = 'ProjectUser'
-        query_req.sort.extend(['+age'])
-        query_req.page_size = 7
-        query_req.page_num = 1
-        res = await client.get_many(query_req)
+        # query_req = pb2.QueryRequest()
+        # query_req.query = {'name': {'$gte': '1'}}
+        # query_req.project_model = 'ProjectUser'
+        # query_req.sort.extend(['+age'])
+        # query_req.page_size = 7
+        # query_req.page_num = 1
+        # res = await client.get_many(query_req)
+
+        update_many_req = pb2.UpdateManyRequest()
+        # update_req = pb2.UpdateRequest()
+        # update_req.query = {'name': '0'}
+        # update_req.set = {'aa': 'sss22'}
+        # update_many_req.update_request_list.append(update_req)
+        update_req = pb2.UpdateRequest()
+        update_req.query = {'name': '7'}
+        update_req.set = {'aa.$[elem].a': 'aaaaaaaaa'}
+        update_req.array_filter = {'elem.index': 1}
+        # update_req.upsert = True
+        update_many_req.update_request_list.append(update_req)
+        res = await client.update_many(update_many_req)
 
         print(res)
 

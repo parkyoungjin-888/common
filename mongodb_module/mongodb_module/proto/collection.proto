@@ -10,9 +10,7 @@ service CollectionServer {
   rpc GetTag (TagRequest) returns (DocResponse);
   rpc GetOne (IdRequest) returns (DocResponse);
   rpc GetMany (QueryRequest) returns (DocListResponse);
-  rpc UpdateOne (UpdateRequest) returns (CountResponse);
   rpc UpdateMany (UpdateManyRequest) returns (CountResponse);
-  rpc DeleteOne (IdRequest) returns (CountResponse);
   rpc DeleteMany (QueryRequest) returns (CountResponse);
   rpc Aggregate (AggregateRequest) returns (DocListResponse);
 }
@@ -48,11 +46,11 @@ message UpdateRequest {
   optional google.protobuf.Struct unset = 3;
   optional google.protobuf.Struct push = 4;
   optional google.protobuf.Struct array_filter = 5;
-  optional google.protobuf.Struct update_option = 6;
+  optional bool upsert = 6;
 }
 
 message UpdateManyRequest {
-  repeated UpdateRequest update_request = 1;
+  repeated UpdateRequest update_request_list = 1;
 }
 
 message AggregateRequest {
