@@ -3,11 +3,13 @@ import grpc
 import json
 from datetime import datetime
 from functools import wraps
+from pydantic import BaseModel
 from google.protobuf.json_format import MessageToDict
 from google.protobuf import struct_pb2
 from mongodb_module.proto import collection_pb2 as pb2
 from mongodb_module.proto import collection_pb2_grpc
-from pydantic import BaseModel
+
+from mongodb_module.beanie_data_model.model_importer import import_model
 
 
 convert_map = {
@@ -43,10 +45,11 @@ def grpc_client_error_handler(response):
 
 
 class CollectionClient:
-    def __init__(self, host: str, port: int, collection_model: type[BaseModel]):
+    def __init__(self, host: str, port: int, model_module_name: str, model_name: str):
         self.channel = grpc.aio.insecure_channel(f'{host}:{port}')
         self.stub = collection_pb2_grpc.CollectionServerStub(self.channel)
-        self.collection_model = collection_model
+        self.model_module_name = model_module_name
+        self.collection_model = import_model(self.model_module_name, model_name)
 
     async def __aenter__(self):
         return self
@@ -93,7 +96,12 @@ class CollectionClient:
         res = MessageToDict(res, preserving_proto_field_name=True)
         if res['code'] // 100 != 2:
             return res
-        res['doc_list'] = [self.collection_model(**doc).model_dump(by_alias=True) for doc in res['doc_list']]
+
+        if query_req.HasField('project_model'):
+            project_model = import_model(self.model_module_name, query_req.project_model)
+            res['doc_list'] = [project_model(**doc).model_dump(by_alias=True) for doc in res['doc_list']]
+        else:
+            res['doc_list'] = [self.collection_model(**doc).model_dump(by_alias=True) for doc in res['doc_list']]
         return res
 
     @grpc_client_error_handler(pb2.CountResponse())
@@ -117,7 +125,7 @@ class CollectionClient:
 
 async def main():
     from mongodb_module.beanie_data_model.user_model import UserBase
-    async with CollectionClient('127.0.0.1', 11122, UserBase) as client:
+    async with CollectionClient('127.0.0.1', 11122, 'user_model', 'User') as client:
         # doc_req = pb2.DocRequest()
         # doc_req.doc = {'name': '1', 'age': 333}
         # res = await client.insert_one(doc_req)
@@ -138,13 +146,13 @@ async def main():
         # id_req.doc_id = '6734aa6c310830ac00960585'
         # res = await client.get_one(id_req)
 
-        # query_req = pb2.QueryRequest()
-        # query_req.query = {'name': {'$gte': '1'}}
-        # query_req.project_model = 'ProjectUser'
-        # query_req.sort.extend(['+age'])
-        # query_req.page_size = 7
-        # query_req.page_num = 1
-        # res = await client.get_many(query_req)
+        query_req = pb2.QueryRequest()
+        query_req.query = {'name': {'$gte': '1'}}
+        query_req.project_model = 'ProjectUser'
+        query_req.sort.extend(['+age'])
+        query_req.page_size = 7
+        query_req.page_num = 1
+        res = await client.get_many(query_req)
 
         # update_many_req = pb2.UpdateManyRequest()
         # # update_req = pb2.UpdateRequest()
@@ -159,11 +167,11 @@ async def main():
         # update_many_req.update_request_list.append(update_req)
         # res = await client.update_many(update_many_req)
 
-        aggregate_req = pb2.AggregateRequest()
-        pipeline = struct_pb2.Struct()
-        pipeline.update({'$group': {'_id': '$name', 'count': {'$sum': 1}}})
-        aggregate_req.pipeline.append(pipeline)
-        res = await client.aggregate(aggregate_req)
+        # aggregate_req = pb2.AggregateRequest()
+        # pipeline = struct_pb2.Struct()
+        # pipeline.update({'$group': {'_id': '$name', 'count': {'$sum': 1}}})
+        # aggregate_req.pipeline.append(pipeline)
+        # res = await client.aggregate(aggregate_req)
 
         print(res)
 
