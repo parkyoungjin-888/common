@@ -3,6 +3,8 @@ from beanie import Document, init_beanie
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from mongodb_module.beanie_data_model.model_importer import import_model
+
 
 class BaseDocument(Document):
     @classmethod
@@ -40,6 +42,7 @@ class BeanieControl:
         server_urls_str = ','.join(server_urls)
         self.db_url = f'mongodb://{db_id}:{db_pw}@{server_urls_str}/?replicaSet={replica_name}'
 
-    async def init(self, data_model_list: list[Type[BaseDocument]]):
+    async def init(self, module_name: str, model_name: str):
+        data_model_list = [import_model(module_name, model_name)]
         client = AsyncIOMotorClient(self.db_url)
         await init_beanie(database=client[self.db], document_models=data_model_list)
