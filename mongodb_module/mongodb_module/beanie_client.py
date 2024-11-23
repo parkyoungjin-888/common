@@ -102,6 +102,18 @@ class CollectionClient:
         res = MessageToDict(res, preserving_proto_field_name=True)
         return res
 
+    @grpc_client_error_handler(pb2.CountResponse())
+    async def delete_many(self, query_req: pb2.QueryRequest) -> dict:
+        res = await self.stub.DeleteMany(query_req)
+        res = MessageToDict(res, preserving_proto_field_name=True)
+        return res
+
+    @grpc_client_error_handler(pb2.DocListResponse())
+    async def aggregate(self, query_req: pb2.AggregateRequest) -> dict:
+        res = await self.stub.Aggregate(query_req)
+        res = MessageToDict(res, preserving_proto_field_name=True)
+        return res
+
 
 async def main():
     from mongodb_module.beanie_data_model.user_model import UserBase
@@ -134,18 +146,24 @@ async def main():
         # query_req.page_num = 1
         # res = await client.get_many(query_req)
 
-        update_many_req = pb2.UpdateManyRequest()
+        # update_many_req = pb2.UpdateManyRequest()
+        # # update_req = pb2.UpdateRequest()
+        # # update_req.query = {'name': '0'}
+        # # update_req.set = {'aa': 'sss22'}
+        # # update_many_req.update_request_list.append(update_req)
         # update_req = pb2.UpdateRequest()
-        # update_req.query = {'name': '0'}
-        # update_req.set = {'aa': 'sss22'}
+        # update_req.query = {'name': '7'}
+        # update_req.set = {'aa.$[elem].a': 'aaaaaaaaa'}
+        # update_req.array_filter = {'elem.index': 1}
+        # # update_req.upsert = True
         # update_many_req.update_request_list.append(update_req)
-        update_req = pb2.UpdateRequest()
-        update_req.query = {'name': '7'}
-        update_req.set = {'aa.$[elem].a': 'aaaaaaaaa'}
-        update_req.array_filter = {'elem.index': 1}
-        # update_req.upsert = True
-        update_many_req.update_request_list.append(update_req)
-        res = await client.update_many(update_many_req)
+        # res = await client.update_many(update_many_req)
+
+        aggregate_req = pb2.AggregateRequest()
+        pipeline = struct_pb2.Struct()
+        pipeline.update({'$group': {'_id': '$name', 'count': {'$sum': 1}}})
+        aggregate_req.pipeline.append(pipeline)
+        res = await client.aggregate(aggregate_req)
 
         print(res)
 

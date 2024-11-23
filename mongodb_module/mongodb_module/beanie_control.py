@@ -25,8 +25,8 @@ class BaseDocument(Document):
         return {'doc_list': doc_list, 'total_count': total_count}
 
     @classmethod
-    async def delete_many(cls, find_key: dict) -> int:
-        result = await cls.find(find_key).delete()
+    async def delete_many(cls, query: dict) -> int:
+        result = await cls.find(query).delete()
         return result.deleted_count
 
     @classmethod
