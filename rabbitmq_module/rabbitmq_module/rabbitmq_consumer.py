@@ -25,21 +25,10 @@ class RabbitmqConsumer:
                 channel.queue_declare(queue=queue, durable=True)
                 channel.queue_bind(queue=queue, exchange=self.exchange)
 
-    # def callback_wrapper(self, ch, method, properties, body):
-    #     try:
-    #         message = json.loads(body.decode('utf-8'))
-    #         self.callback(message)
-    #         ch.basic_ack(delivery_tag=method.delivery_tag)
-    #     except Exception as e:
-    #         print(f'error in RabbitmqConsumer callback_func : {e}')
-    #         ch.basic_nack(delivery_tag=method.delivery_tag)
-
     def consuming(self) -> None:
         with pika.BlockingConnection(pika.URLParameters(self.url)) as connection:
             with connection.channel() as channel:
                 channel.basic_qos(prefetch_count=0)
-                # channel.basic_consume(queue=self.queue, on_message_callback=self.callback_wrapper)
-                # channel.start_consuming()
 
                 while True:
                     after_time = time.time() - self.last_callback_time if self.last_callback_time is not None else 600
