@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from logging.handlers import RotatingFileHandler
@@ -23,6 +24,9 @@ class LoggerSingleton:
     def get_logger(name: str,
                    file_name: str = None, max_file_size: int = 1*1024*1024, file_count: int = 10,
                    level=logging.INFO) -> logging.Logger:
+        log_dir = os.path.dirname(file_name)
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
         with LoggerSingleton._lock:
             if name not in LoggerSingleton._instances:
                 LoggerSingleton._instances[name] = LoggerSingleton._create_logger(name, file_name, max_file_size, file_count, level)
