@@ -8,7 +8,7 @@ convert_map = {
     'str': str,
     'int': int,
     'float': float,
-    'bool': bool,
+    'bool': (lambda s: s.strip().lower() == 'true'),
     'list': lambda x: json.loads(x.replace("'", '"')),
     'datetime': (lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f'))
 }

@@ -15,16 +15,7 @@ class ConfigLoader:
         self.port = config['app']['port']
 
     def get_config(self, app_id: str) -> dict:
-        updated_datetime = datetime.now()
-        config = self.collection.find_one_and_update({'app_id': app_id},
-                                                     {'$push': {
-                                                         'app_start_datetime_list':
-                                                             {
-                                                                 '$each': [updated_datetime],
-                                                                 '$position': 0,
-                                                                 '$slice': self.start_recode_limit
-                                                             }
-                                                     }})
+        config = self.collection.find_one({'app_id': app_id})
         return config if config is not None else {}
 
     def unpack_config(self, config: dict, parent_key: str = '') -> list[dict]:
