@@ -290,7 +290,7 @@ develop = false
 type = "git"
 url = "https://github.com/parkyoungjin-888/common.git"
 reference = "HEAD"
-resolved_reference = "70ce91d99d420a3443b86cdce8ebd0789472bcf9"
+resolved_reference = "69ffe9a15c943d7fb8cba12c266ba11a6727ff08"
 subdirectory = "utils_module"
 
 [metadata]
