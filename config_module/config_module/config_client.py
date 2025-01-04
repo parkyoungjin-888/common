@@ -1,17 +1,10 @@
+from datetime import datetime
+import json
 import grpc
 from config_module.proto import config_pb2
 from config_module.proto import config_pb2_grpc
-from datetime import datetime
-import json
 
-convert_map = {
-    'str': str,
-    'int': int,
-    'float': float,
-    'bool': (lambda s: s.strip().lower() == 'true'),
-    'list': lambda x: json.loads(x.replace("'", '"')),
-    'datetime': (lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f'))
-}
+from utils_module.type_convert import convert_date_type
 
 
 def convert_dict(flat_dict):
@@ -37,8 +30,7 @@ class ConfigClient:
 
         config_data = {}
         for r_c_d in res.config_data:
-            convert_func = convert_map[r_c_d.type]
-            config_data[r_c_d.key] = convert_func(r_c_d.value)
+            config_data[r_c_d.key] = convert_date_type(r_c_d.value, r_c_d.type)
 
         config_data = convert_dict(config_data)
         return config_data
