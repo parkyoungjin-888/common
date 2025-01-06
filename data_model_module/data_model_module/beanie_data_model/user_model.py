@@ -1,11 +1,10 @@
 from typing import Optional
 from beanie import PydanticObjectId
+from bson import ObjectId
 from pydantic import BaseModel, Field, root_validator
 
-from mongodb_module.beanie_control import BaseDocument
 
-
-class UserBase(BaseModel):
+class User(BaseModel):
     name: str
     age: int
     email: Optional[str | None] = None
@@ -33,12 +32,7 @@ class UserBase(BaseModel):
         return values
 
 
-class User(BaseDocument, UserBase):
-    class Settings:
-        name = 'user'
-
-
 class ProjectUser(BaseModel):
-    id: PydanticObjectId = Field(alias='_id')
+    id: ObjectId = Field(alias='_id')
     name: str
     age: int
