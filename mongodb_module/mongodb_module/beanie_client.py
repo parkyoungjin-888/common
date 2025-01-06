@@ -1,26 +1,12 @@
 import asyncio
 import grpc
-import json
-from datetime import datetime
 from functools import wraps
-from pydantic import BaseModel
 from google.protobuf.json_format import MessageToDict
-from google.protobuf import struct_pb2
 from mongodb_module.proto import collection_pb2 as pb2
 from mongodb_module.proto import collection_pb2_grpc
+from pydantic import BaseModel
 
-from mongodb_module.beanie_data_model.model_importer import import_model
-
-
-convert_map = {
-    'str': str,
-    'int': int,
-    'float': float,
-    'bool': bool,
-    'list': lambda x: json.loads(x.replace("'", '"')),
-    'datetime': (lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f')),
-    'ObjectId': str
-}
+from utils_module.type_convert import convert_map
 
 
 def grpc_client_error_handler(response):
@@ -45,11 +31,10 @@ def grpc_client_error_handler(response):
 
 
 class CollectionClient:
-    def __init__(self, host: str, port: int, model_module_name: str, model_name: str):
+    def __init__(self, host: str, port: int, collection_model: BaseModel):
         self.channel = grpc.aio.insecure_channel(f'{host}:{port}')
         self.stub = collection_pb2_grpc.CollectionServerStub(self.channel)
-        self.model_module_name = model_module_name
-        self.collection_model = import_model(self.model_module_name, model_name)
+        self.collection_model = collection_model
 
     async def __aenter__(self):
         return self
@@ -91,14 +76,13 @@ class CollectionClient:
         return res
 
     @grpc_client_error_handler(pb2.DocListResponse())
-    async def get_many(self, query_req: pb2.QueryRequest) -> dict:
+    async def get_many(self, query_req: pb2.QueryRequest, project_model: BaseModel = None) -> dict:
         res = await self.stub.GetMany(query_req)
         res = MessageToDict(res, preserving_proto_field_name=True)
         if res['code'] // 100 != 2:
             return res
 
-        if query_req.HasField('project_model'):
-            project_model = import_model(self.model_module_name, query_req.project_model)
+        if query_req.HasField('project_model') and project_model is not None:
             res['doc_list'] = [project_model(**doc).model_dump(by_alias=True) for doc in res['doc_list']]
         else:
             res['doc_list'] = [self.collection_model(**doc).model_dump(by_alias=True) for doc in res['doc_list']]
@@ -123,9 +107,40 @@ class CollectionClient:
         return res
 
 
-async def main():
-    from mongodb_module.beanie_data_model.user_model import UserBase
-    async with CollectionClient('127.0.0.1', 11122, 'user_model', 'User') as client:
+async def function_test():
+    from typing import Optional
+    from beanie import PydanticObjectId
+    from pydantic import BaseModel, Field, root_validator
+    from google.protobuf import struct_pb2
+
+    class User(BaseModel):
+        name: str
+        age: int
+        email: Optional[str | None] = None
+
+        class Config:
+            extra = 'allow'
+
+        @root_validator(pre=True)
+        def type_based_conversion(cls, values):
+            for field_name, value in values.items():
+                if field_name not in cls.__annotations__:
+                    continue
+                field_type = cls.__annotations__.get(field_name)
+                if field_type == str and not isinstance(value, str):
+                    values[field_name] = str(value)
+                if field_type == int and isinstance(value, str) and value.isdigit():
+                    values[field_name] = int(value)
+                elif field_type == int and isinstance(value, float):
+                    values[field_name] = int(value)
+                elif field_type == float and isinstance(value, str):
+                    try:
+                        values[field_name] = float(value)
+                    except ValueError:
+                        raise ValueError(f'Field {field_name} expects a float value, got {value}')
+            return values
+
+    async with CollectionClient('127.0.0.1', 11122, User) as client:
         # doc_req = pb2.DocRequest()
         # doc_req.doc = {'name': '1', 'age': 333}
         # res = await client.insert_one(doc_req)
@@ -146,13 +161,18 @@ async def main():
         # id_req.doc_id = '6734aa6c310830ac00960585'
         # res = await client.get_one(id_req)
 
+        class ProjectUser(BaseModel):
+            id: PydanticObjectId = Field(alias='_id')
+            name: str
+            age: int
+
         query_req = pb2.QueryRequest()
         query_req.query = {'name': {'$gte': '1'}}
         query_req.project_model = 'ProjectUser'
         query_req.sort.extend(['+age'])
         query_req.page_size = 7
         query_req.page_num = 1
-        res = await client.get_many(query_req)
+        res = await client.get_many(query_req, ProjectUser)
 
         # update_many_req = pb2.UpdateManyRequest()
         # # update_req = pb2.UpdateRequest()
@@ -177,4 +197,4 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(function_test())
