@@ -51,3 +51,4 @@ class BeanieControl:
         data_model_list = [create_data_model_class(base_model, collection_name)]
         client = AsyncIOMotorClient(self.db_url)
         await init_beanie(database=client[self.db], document_models=data_model_list)
+        return data_model_list[0]
