@@ -1,6 +1,5 @@
 from typing import Optional
 from beanie import PydanticObjectId
-from bson import ObjectId
 from pydantic import BaseModel, Field, root_validator
 
 
@@ -33,6 +32,6 @@ class User(BaseModel):
 
 
 class ProjectUser(BaseModel):
-    id: ObjectId = Field(alias='_id')
+    id: PydanticObjectId = Field(alias='_id')
     name: str
     age: int
