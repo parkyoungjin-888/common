@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 from beanie import PydanticObjectId
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, root_validator, ConfigDict
 
 
 class AnalysisCategory(Enum):
@@ -15,8 +15,7 @@ class AnalysisConfig(BaseModel):
     category: Optional[AnalysisCategory | None] = None
     config: dict = None
 
-    class Config:
-        extra = 'allow'
+    model_config = ConfigDict(use_enum_values=True)
 
     @root_validator(pre=True)
     def type_based_conversion(cls, values):
