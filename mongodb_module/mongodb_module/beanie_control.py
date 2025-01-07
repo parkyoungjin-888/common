@@ -42,13 +42,15 @@ def create_data_model_class(base_model: BaseModel, collection_name: str) -> Type
 
 
 class BeanieControl:
-    def __init__(self, db: str, db_id: str, db_pw: str, server_urls: list[str], replica_name: str = 'rs0'):
+    def __init__(self, db: str, collection: str, db_id: str, db_pw: str,
+                 server_urls: list[str], replica_name: str = 'rs0'):
         self.db = db
+        self.collection = collection
         server_urls_str = ','.join(server_urls)
         self.db_url = f'mongodb://{db_id}:{db_pw}@{server_urls_str}/?replicaSet={replica_name}'
 
-    async def init(self, base_model: BaseModel, collection_name: str):
-        data_model_list = [create_data_model_class(base_model, collection_name)]
+    async def init(self, base_model: BaseModel):
+        data_model_list = [create_data_model_class(base_model, self.collection)]
         client = AsyncIOMotorClient(self.db_url)
         await init_beanie(database=client[self.db], document_models=data_model_list)
         return data_model_list[0]
