@@ -1,6 +1,6 @@
 import asyncio
-import grpc
 from functools import wraps
+import grpc
 from google.protobuf.json_format import MessageToDict
 from mongodb_module.proto import collection_pb2 as pb2
 from mongodb_module.proto import collection_pb2_grpc
@@ -43,7 +43,8 @@ class CollectionClient:
         await self.channel.close()
 
     @grpc_client_error_handler(pb2.IdResponse())
-    async def insert_one(self, doc_req: pb2.DocRequest) -> dict:
+    async def insert_one(self, doc: dict) -> dict:
+        doc_req = pb2.DocRequest(doc=doc)
         res = await self.stub.InsertOne(doc_req)
         res = MessageToDict(res, preserving_proto_field_name=True)
         return res
