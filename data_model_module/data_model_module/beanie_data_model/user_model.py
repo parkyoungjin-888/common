@@ -1,6 +1,6 @@
 from typing import Optional
 from beanie import PydanticObjectId
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 
 class User(BaseModel):
@@ -35,3 +35,7 @@ class ProjectUser(BaseModel):
     id: PydanticObjectId = Field(alias='_id')
     name: str
     age: int
+
+    @validator('id', pre=False)
+    def convert_object_id2str(cls, value):
+        return str(value)
