@@ -1,11 +1,12 @@
 import asyncio
 from functools import wraps
 import grpc
+from google.protobuf import struct_pb2
 from google.protobuf.json_format import MessageToDict
-from mongodb_module.proto import collection_pb2 as pb2
-from mongodb_module.proto import collection_pb2_grpc
 from pydantic import BaseModel
 
+from mongodb_module.proto import collection_pb2 as pb2
+from mongodb_module.proto import collection_pb2_grpc
 from utils_module.type_convert import convert_map
 
 
@@ -50,14 +51,22 @@ class CollectionClient:
         return res
 
     @grpc_client_error_handler(pb2.IdListResponse())
-    async def insert_many(self, doc_list_req: pb2.DocListRequest) -> dict:
+    async def insert_many(self, doc_list: list[dict]) -> dict:
+        doc_list_req = pb2.DocListRequest()
+        for doc in doc_list:
+            struct_doc = struct_pb2.Struct()
+            struct_doc.update(doc)
+            doc_list_req.doc_list.append(struct_doc)
         res = await self.stub.InsertMany(doc_list_req)
         res = MessageToDict(res, preserving_proto_field_name=True)
         return res
 
     @grpc_client_error_handler(pb2.DocResponse())
-    async def get_tag(self, query_req: pb2.DocResponse) -> dict:
-        res = await self.stub.GetTag(query_req)
+    async def get_tag(self, field_list: list[str], query: dict) -> dict:
+        tag_req = pb2.TagRequest()
+        tag_req.field_list.extend(field_list)
+        tag_req.query = query
+        res = await self.stub.GetTag(tag_req)
         res = MessageToDict(res, preserving_proto_field_name=True)
         if res['code'] // 100 != 2:
             return res
@@ -65,11 +74,13 @@ class CollectionClient:
         for key, value in res['doc'].items():
             doc[key] = list(map(lambda x: convert_map[x['type']](x['value']), value))
         res['doc'] = doc
-        return res
+        return doc
 
     @grpc_client_error_handler(pb2.DocResponse())
-    async def get_one(self, query_req: pb2.DocResponse) -> dict:
-        res = await self.stub.GetOne(query_req)
+    async def get_one(self, doc_id: str) -> dict:
+        id_req = pb2.IdRequest()
+        id_req.doc_id = doc_id
+        res = await self.stub.GetOne(id_req)
         res = MessageToDict(res, preserving_proto_field_name=True)
         if res['code'] // 100 != 2:
             return res
@@ -77,125 +88,67 @@ class CollectionClient:
         return res
 
     @grpc_client_error_handler(pb2.DocListResponse())
-    async def get_many(self, query_req: pb2.QueryRequest, project_model: BaseModel = None) -> dict:
+    async def get_many(self, query: dict, project_model: BaseModel = None, sort: list[str] = None,
+                       page_size: int = None, page_num: int = None) -> dict:
+        query_req = pb2.QueryRequest()
+        query_req.query = query
+        if project_model is not None:
+            query_req.project_model = project_model.__name__
+        if sort is not None:
+            query_req.sort.extend(sort)
+        if page_size is not None:
+            query_req.page_size = page_size
+            query_req.page_num = page_num
+
         res = await self.stub.GetMany(query_req)
-        res = MessageToDict(res, preserving_proto_field_name=True)
+        res = MessageToDict(res, always_print_fields_with_no_presence=True, preserving_proto_field_name=True)
         if res['code'] // 100 != 2:
             return res
 
-        if query_req.HasField('project_model') and project_model is not None:
+        if project_model is not None:
             res['doc_list'] = [project_model(**doc).model_dump(by_alias=True) for doc in res['doc_list']]
         else:
             res['doc_list'] = [self.collection_model(**doc).model_dump(by_alias=True) for doc in res['doc_list']]
         return res
 
     @grpc_client_error_handler(pb2.CountResponse())
-    async def update_many(self, update_many_req: pb2.UpdateManyRequest) -> dict:
+    async def update_many(self, query: dict, set: dict=None, unset: dict=None, push: dict=None,
+                          array_filter: dict=None, upsert: bool=None) -> dict:
+        update_many_req = pb2.UpdateManyRequest()
+        update_req = pb2.UpdateRequest()
+        update_req.query = query
+        if set is None and unset is None and push is None:
+            raise ValueError('set or unset or push be required')
+        if set is not None:
+            update_req.set = set
+        if unset is not None:
+            update_req.unset = unset
+        if push is not None:
+            update_req.push = push
+        if array_filter is not None:
+            update_req.array_filter = array_filter
+        if upsert is not None:
+            update_req.upsert = upsert
+        update_many_req.update_request_list.append(update_req)
         res = await self.stub.UpdateMany(update_many_req)
-        res = MessageToDict(res, preserving_proto_field_name=True)
+        res = MessageToDict(res, always_print_fields_with_no_presence=True, preserving_proto_field_name=True)
         return res
 
     @grpc_client_error_handler(pb2.CountResponse())
-    async def delete_many(self, query_req: pb2.QueryRequest) -> dict:
+    async def delete_many(self, query: dict) -> dict:
+        query_req = pb2.QueryRequest()
+        query_req.query = query
         res = await self.stub.DeleteMany(query_req)
-        res = MessageToDict(res, preserving_proto_field_name=True)
+        res = MessageToDict(res, always_print_fields_with_no_presence=True, preserving_proto_field_name=True)
         return res
 
     @grpc_client_error_handler(pb2.DocListResponse())
-    async def aggregate(self, query_req: pb2.AggregateRequest) -> dict:
-        res = await self.stub.Aggregate(query_req)
+    async def aggregate(self, pipeline: list[dict]) -> dict:
+        aggregate_req = pb2.AggregateRequest()
+        for content in pipeline:
+            pipeline_unit = struct_pb2.Struct()
+            pipeline_unit.update(content)
+            aggregate_req.pipeline.append(pipeline_unit)
+        res = await self.stub.Aggregate(aggregate_req)
         res = MessageToDict(res, preserving_proto_field_name=True)
         return res
-
-
-async def function_test():
-    from typing import Optional
-    from beanie import PydanticObjectId
-    from pydantic import BaseModel, Field, root_validator
-    from google.protobuf import struct_pb2
-
-    class User(BaseModel):
-        name: str
-        age: int
-        email: Optional[str | None] = None
-
-        class Config:
-            extra = 'allow'
-
-        @root_validator(pre=True)
-        def type_based_conversion(cls, values):
-            for field_name, value in values.items():
-                if field_name not in cls.__annotations__:
-                    continue
-                field_type = cls.__annotations__.get(field_name)
-                if field_type == str and not isinstance(value, str):
-                    values[field_name] = str(value)
-                if field_type == int and isinstance(value, str) and value.isdigit():
-                    values[field_name] = int(value)
-                elif field_type == int and isinstance(value, float):
-                    values[field_name] = int(value)
-                elif field_type == float and isinstance(value, str):
-                    try:
-                        values[field_name] = float(value)
-                    except ValueError:
-                        raise ValueError(f'Field {field_name} expects a float value, got {value}')
-            return values
-
-    async with CollectionClient('127.0.0.1', 11122, User) as client:
-        # doc_req = pb2.DocRequest()
-        # doc_req.doc = {'name': '1', 'age': 333}
-        # res = await client.insert_one(doc_req)
-
-        # doc_list_req = pb2.DocListRequest()
-        # for i in range(5):
-        #     doc = struct_pb2.Struct()
-        #     doc.update({'name': str(i), 'age': i})
-        #     doc_list_req.doc_list.append(doc)
-        # res = await client.insert_many(doc_list_req)
-
-        # tag_req = pb2.TagRequest()
-        # tag_req.field_list.extend(['_id', 'age', 'name'])
-        # tag_req.query = {'name': {'$gte': '1'}}
-        # res = await client.get_tag(tag_req)
-
-        # id_req = pb2.IdRequest()
-        # id_req.doc_id = '6734aa6c310830ac00960585'
-        # res = await client.get_one(id_req)
-
-        class ProjectUser(BaseModel):
-            id: PydanticObjectId = Field(alias='_id')
-            name: str
-            age: int
-
-        query_req = pb2.QueryRequest()
-        query_req.query = {'name': {'$gte': '1'}}
-        query_req.project_model = 'ProjectUser'
-        query_req.sort.extend(['+age'])
-        query_req.page_size = 7
-        query_req.page_num = 1
-        res = await client.get_many(query_req, ProjectUser)
-
-        # update_many_req = pb2.UpdateManyRequest()
-        # # update_req = pb2.UpdateRequest()
-        # # update_req.query = {'name': '0'}
-        # # update_req.set = {'aa': 'sss22'}
-        # # update_many_req.update_request_list.append(update_req)
-        # update_req = pb2.UpdateRequest()
-        # update_req.query = {'name': '7'}
-        # update_req.set = {'aa.$[elem].a': 'aaaaaaaaa'}
-        # update_req.array_filter = {'elem.index': 1}
-        # # update_req.upsert = True
-        # update_many_req.update_request_list.append(update_req)
-        # res = await client.update_many(update_many_req)
-
-        # aggregate_req = pb2.AggregateRequest()
-        # pipeline = struct_pb2.Struct()
-        # pipeline.update({'$group': {'_id': '$name', 'count': {'$sum': 1}}})
-        # aggregate_req.pipeline.append(pipeline)
-        # res = await client.aggregate(aggregate_req)
-
-        print(res)
-
-
-if __name__ == '__main__':
-    asyncio.run(function_test())
