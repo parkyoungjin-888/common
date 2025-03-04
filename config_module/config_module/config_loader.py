@@ -4,7 +4,7 @@ from datetime import datetime
 
 class ConfigLoader:
     def __init__(self, config_db_path: str, app_id: str,
-                 db: str = 'admin', collection: str = 'app_config', start_recode_limit=10):
+                 db: str = 'app', collection: str = 'config', start_recode_limit=10):
         client = pymongo.MongoClient(config_db_path)
         db = client[db]
         self.collection = db.get_collection(collection)
