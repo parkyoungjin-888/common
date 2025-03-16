@@ -3,16 +3,11 @@ from datetime import datetime
 
 
 class ConfigLoader:
-    def __init__(self, config_db_path: str, app_id: str,
-                 db: str = 'app', collection: str = 'config', start_recode_limit=10):
+    def __init__(self, config_db_path: str, db: str = 'app', collection: str = 'config'):
         client = pymongo.MongoClient(config_db_path)
         db = client[db]
         self.collection = db.get_collection(collection)
-        self.start_recode_limit = start_recode_limit
-        self.exclude_field = ['_id', 'app_start_datetime_list']
-        config = self.get_config(app_id=app_id)
-        self.name = config['app']['name']
-        self.port = config['app']['port']
+        self.exclude_field = ['_id']
 
     def get_config(self, app_id: str) -> dict:
         config = self.collection.find_one({'app_id': app_id})
