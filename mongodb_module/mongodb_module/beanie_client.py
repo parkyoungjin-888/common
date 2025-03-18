@@ -74,7 +74,7 @@ class CollectionClient:
         for key, value in res['doc'].items():
             doc[key] = list(map(lambda x: convert_map[x['type']](x['value']), value))
         res['doc'] = doc
-        return doc
+        return res
 
     @grpc_client_error_handler(pb2.DocResponse())
     async def get_one(self, doc_id: str) -> dict:
