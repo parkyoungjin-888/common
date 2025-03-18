@@ -10,10 +10,15 @@ class JsonFormatter(logging.Formatter):
         log_record = {
             'time': self.formatTime(record, self.datefmt),
             'name': record.name,
-            'level': record.levelname,
-            'message': record.getMessage(),
+            'level': record.levelname
         }
-        return json.dumps(log_record)
+
+        if isinstance(record.msg, dict):
+            log_record.update(record.msg)
+        else:
+            log_record["message"] = record.getMessage()
+
+        return json.dumps(log_record, ensure_ascii=False)
 
 
 class LoggerSingleton:
@@ -24,9 +29,11 @@ class LoggerSingleton:
     def get_logger(name: str,
                    file_name: str = None, max_file_size: int = 1*1024*1024, file_count: int = 10,
                    level=logging.INFO) -> logging.Logger:
-        log_dir = os.path.dirname(file_name)
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
+        if file_name is not None:
+            log_dir = os.path.dirname(file_name)
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir)
+
         with LoggerSingleton._lock:
             if name not in LoggerSingleton._instances:
                 LoggerSingleton._instances[name] = LoggerSingleton._create_logger(name, file_name, max_file_size, file_count, level)
