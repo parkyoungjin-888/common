@@ -85,7 +85,7 @@ pydantic = "^2.10.4"
 type = "git"
 url = "https://github.com/parkyoungjin-888/common.git"
 reference = "HEAD"
-resolved_reference = "5dc25191114f09dbc02207ab7eb788d7e53995c2"
+resolved_reference = "5c3d3d004f2f570edfe8400939848342debb123b"
 subdirectory = "data_model_module"
 
 [[package]]
