@@ -85,7 +85,7 @@ pydantic = "^2.10.4"
 type = "git"
 url = "https://github.com/parkyoungjin-888/common.git"
 reference = "HEAD"
-resolved_reference = "5c3d3d004f2f570edfe8400939848342debb123b"
+resolved_reference = "aa726281eec67f81d47fdc73591f0a01624fe01d"
 subdirectory = "data_model_module"
 
 [[package]]
@@ -480,4 +480,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "e95ec1d73536ad2692ab88f39e2ebace25381a89b48832700ced672d37169cd6"
+content-hash = "618dbaffcb4acc75322c1c61b2edfb039bd407113b22fa0bc6077bd7ef53510b"
